@@ -20,10 +20,11 @@ class TradingApp:
         self.stop_loss = tk.DoubleVar(value=50)
         self.take_profit = tk.DoubleVar(value=100)
         self.symb = tk.StringVar(value='^NDX')
+        self.interval = tk.StringVar(value='5m')
 
         # GUI Layout
         self.create_widgets()
-        self.fetch_data()
+        #self.fetch_data()
 
     def create_widgets(self):
         frame = ttk.Frame(self.root, padding="10")
@@ -47,10 +48,14 @@ class TradingApp:
         ttk.Label(frame, text="Symbol").grid(column=0, row=4, sticky=tk.W)
         ttk.Entry(frame, textvariable=self.symb).grid(column=1, row=4, sticky=(tk.W, tk.E))
 
-        ttk.Button(frame, text="Start Backtest", command=self.start_backtest).grid(column=0, row=5, columnspan=2)
+        ttk.Label(frame, text="Interval").grid(column=0, row=5, sticky=tk.W)
+        intervals = ['1m', '2m', '5m', '15m', '30m', '60m', '90m', '1h']
+        ttk.Combobox(frame, textvariable=self.interval, values=intervals).grid(column=1, row=5, sticky=(tk.W, tk.E))
+
+        ttk.Button(frame, text="Start Backtest", command=self.start_backtest).grid(column=0, row=6, columnspan=2)
 
         self.result_text = tk.Text(frame, height=20, width=80)
-        self.result_text.grid(column=0, row=6, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
+        self.result_text.grid(column=0, row=7, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S))
         frame.rowconfigure(5, weight=1)
 
         self.graph_frame = ttk.Frame(self.root)
@@ -61,13 +66,16 @@ class TradingApp:
     def fetch_data(self):
         try:
             symb = self.symb.get()
-            fetch_historical_data(symb)
+            fetch_historical_data(symb, interval=self.interval.get())
             self.result_text.insert(tk.END, "Historical data fetched successfully.\n")
         except ValueError as e:
             self.result_text.insert(tk.END, f"Error fetching data: {e}\n")
 
     def start_backtest(self):
+        self.clear_graph()
+        self.result_text.delete("1.0", tk.END)
         try:
+            self.fetch_data()
             results, trades, equity_curve = run_backtest(
                 capital=self.capital.get(),
                 risk=self.risk.get(),
@@ -84,7 +92,9 @@ class TradingApp:
             self.plot_equity_curve(equity_curve)
         except Exception as e:
             self.result_text.insert(tk.END, f"Error during backtest: {e}\n")
-
+    def clear_graph(self):
+        for widget in self.graph_frame.winfo_children():
+            widget.destroy()
     def plot_equity_curve(self, equity_curve):
         fig = make_subplots(rows=1, cols=1)
         fig.add_trace(go.Scatter(x=list(range(len(equity_curve))), y=equity_curve, mode='lines', name='Equity Curve'))
