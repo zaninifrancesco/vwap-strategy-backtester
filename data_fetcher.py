@@ -1,3 +1,5 @@
+import os
+
 import yfinance as yf
 import pandas as pd
 
@@ -5,6 +7,8 @@ class TickerNotFoundException(Exception):
     pass
 
 def fetch_historical_data(symbol, period='60d', interval='1d'):
+    if not os.path.exists('data'):
+        os.makedirs('data')
     data = yf.download(symbol, period=period, interval=interval)
     if data.empty:
         raise TickerNotFoundException(f"No data found for symbol {symbol}")

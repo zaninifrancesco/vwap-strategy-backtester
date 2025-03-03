@@ -131,5 +131,8 @@ class TradingStrategy:
                    f"Average Loss: {average_loss}\n"
                    f"Max Consecutive Wins: {self.max_consecutive_wins}\n"
                    f"Max Consecutive Losses: {self.max_consecutive_losses}\n"
-                   f"Average Trade Duration (seconds): {average_trade_duration}\n")
+                   f"Average Trade Duration (seconds): {average_trade_duration}\n"
+                   f"Losses: {self.losing_trades}\n"
+                   f"Wins: {self.winning_trades}\n"
+                   )
         return results, self.trades, self.equity_curve
