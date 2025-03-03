@@ -84,6 +84,7 @@ class TradingApp:
             )
             self.result_text.delete(1.0, tk.END)
             self.result_text.insert(tk.END, results)
+
             self.result_text.insert(tk.END, "\n\nList of Trades:\n")
             for index, trade in enumerate(trades):
                 self.result_text.insert(tk.END, trade + "\n")
